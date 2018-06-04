@@ -1,0 +1,61 @@
+---
+#
+# Provision a machine on Ubuntu in the configured default region.
+#
+
+- hosts: 127.0.0.1
+  connection: local
+  gather_facts: false
+
+  vars:
+    # ssh key-pair to create
+    - key_name: default
+    - public_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+    # you will need to have a vpc
+    - vpc_subnet_id: subnet-6798283e
+    - vpc_subnet_zone: "ap-southeast-2c"
+
+    # See list of AMIs here: https://cloud-images.ubuntu.com/locator/ec2/
+    - ubuntu_18_04: ami-5d3aea3f
+    - ubuntu_version: "{{ubuntu_18_04}}"
+
+    # How powerful your desktop is
+    - instance_type: c5.xlarge
+
+    - data_disk_size: 200 # GBs
+
+
+  tasks:
+
+  - name: Make sure ssh key pair exists
+    ec2_key:
+      name: "{{key_name}}"
+      key_material: "{{ public_key }}"
+      state: present
+
+  - name: Create new instance
+    ec2:
+      key_name: "{{key_name}}"
+      instance_type: "{{instance_type}}"
+      image: "{{ubuntu_version}}"
+      instance_initiated_shutdown_behavior: stop
+      wait: yes
+      group: ['default']
+      count: 1
+      vpc_subnet_id: "{{vpc_subnet_id}}"
+      zone: "{{vpc_subnet_zone}}"
+      assign_public_ip: yes
+      instance_tags:
+        Name: new desktop
+      user_data: |
+        #!/bin/bash -ex
+        sudo apt update
+        sudo apt -y install python-simplejson
+    register: desktop
+
+  - name: Create data disk for new instance
+    local_action: ec2_vol instance="{{desktop.instance_ids[0]}}" volume_size="{{data_disk_size}}" device_name="{{item}}" volume_type=gp2
+    with_items:
+      - xvdf
+    register: disk

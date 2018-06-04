@@ -1,0 +1,25 @@
+---
+
+- name: install lubuntu desktop (takes long)
+  apt: name={{item}} state=latest
+  with_items:
+    - lubuntu-desktop
+    - vino
+
+- name: "allow only local connections (we'll tunnel through ssh)"
+  command: gsettings set org.gnome.Vino network-interface lo
+
+# - name: set password
+#   command: gsettings set org.gnome.Vino vnc-password abc123
+
+
+#gconftool-2 --set --type=bool /desktop/gnome/remote_access/enabled true
+# gsettings set org.gnome.Vino enabled true
+# gsettings set org.gnome.Vino prompt-enabled false
+
+##dconf write /org/gnome/desktop/remote-access/enabled true
+#dconf write /org/gnome/desktop/remote-access/prompt-enabled false
+#dconf write /org/gnome/desktop/remote-access/authentication-methods "['vnc']"
+##dconf write /org/gnome/desktop/remote-access/require-encryption false
+#dconf write /org/gnome/desktop/remote-access/vnc-password \"\'$(echo -n $password | base64)\'\"
+#dconf dump /org/gnome/desktop/remote-access/

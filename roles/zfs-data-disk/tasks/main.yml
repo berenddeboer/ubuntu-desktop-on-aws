@@ -1,0 +1,10 @@
+---
+
+- name: make sure zfs is available
+  apt: name=zfsutils-linux state=latest
+
+- name: create pool
+  command: zpool create tank nvme0n1 creates=/tank
+
+- name: enable lz4 compression on pool
+  command: zfs set compression=lz4 tank

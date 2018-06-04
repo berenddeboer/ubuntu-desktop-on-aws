@@ -1,0 +1,7 @@
+---
+
+- name: Make sure our repository is up-to-date
+  apt: update_cache=yes cache_valid_time=7200
+
+- name: make sure existing packages and kernel are all up-to-date
+  apt: upgrade=dist

@@ -1,0 +1,14 @@
+---
+
+#
+# Configure create instance
+#
+
+- hosts: tag_Name_new_desktop
+  user: ubuntu
+  become: true
+
+  roles:
+    - up-to-date
+    - { role: zfs-data-disk, tags: ["zfs"] }
+    - { role: desktop, tags: ["desktop"] }
